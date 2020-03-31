@@ -1,0 +1,10 @@
+{
+	"name": "spring插件站点",
+	"configs": [{
+		"id": "1",
+		"name": "serviceLog",
+		"className": "com.xinyue.business.ServiceLogAspect.class",
+		"jarRemoteUrl": "file:D:/site/SpringPluginsJar/SpringCustomPlugin-0.0.1-SNAPSHOT.jar",
+		"version": "0.0.1-SNAPSHOT"
+	}]
+}
