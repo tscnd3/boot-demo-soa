@@ -11,7 +11,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.xinyue.framework.LtsClient;
+import com.xinyue.framework.lts.LtsClient;
 
 
 
