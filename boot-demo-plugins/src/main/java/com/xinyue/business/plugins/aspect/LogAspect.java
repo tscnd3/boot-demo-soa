@@ -1,4 +1,4 @@
-package com.xinyue.business.aspect;
+package com.xinyue.business.plugins.aspect;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;

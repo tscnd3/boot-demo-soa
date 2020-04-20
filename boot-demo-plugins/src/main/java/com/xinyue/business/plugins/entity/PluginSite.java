@@ -1,4 +1,4 @@
-package com.xinyue.business.entity;
+package com.xinyue.business.plugins.entity;
 
 import java.util.List;
 

@@ -10,5 +10,6 @@
   	<module>boot-demo-spi</module>
 	<module>boo-demo-web</module>
 	<module>boot-demo-plugins</module>
+	<module>boot-demo-java</module>
   </modules>
 </project>

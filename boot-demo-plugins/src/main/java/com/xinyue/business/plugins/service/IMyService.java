@@ -1,4 +1,4 @@
-package com.xinyue.business.service;
+package com.xinyue.business.plugins.service;
 
 
 

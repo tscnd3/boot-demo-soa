@@ -4,10 +4,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.xinyue.business.service.IMyService;
+import com.xinyue.business.plugins.service.IMyService;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest

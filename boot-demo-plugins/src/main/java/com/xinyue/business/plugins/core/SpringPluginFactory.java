@@ -1,4 +1,4 @@
-package com.xinyue.business.core;
+package com.xinyue.business.plugins.core;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -27,7 +27,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
-import com.xinyue.business.entity.PluginConfig;
+import com.xinyue.business.plugins.entity.PluginConfig;
 
 // TODO 待完成项： 本机应用隔离
 // TODO 基于表达示进行装载 至指定切面 

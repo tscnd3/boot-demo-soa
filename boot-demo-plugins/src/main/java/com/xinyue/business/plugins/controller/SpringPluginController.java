@@ -1,4 +1,4 @@
-package com.xinyue.business.controller;
+package com.xinyue.business.plugins.controller;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -18,9 +18,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
-import com.xinyue.business.core.SpringPluginFactory;
-import com.xinyue.business.entity.PluginConfig;
-import com.xinyue.business.entity.PluginSite;
+import com.xinyue.business.plugins.core.SpringPluginFactory;
+import com.xinyue.business.plugins.entity.PluginConfig;
+import com.xinyue.business.plugins.entity.PluginSite;
 import com.xinyue.framework.util.ObjectUtil;
 
 @Controller

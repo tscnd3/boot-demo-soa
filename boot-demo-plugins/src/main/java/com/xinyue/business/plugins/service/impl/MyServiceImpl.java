@@ -1,8 +1,8 @@
-package com.xinyue.business.service.impl;
+package com.xinyue.business.plugins.service.impl;
 
 import org.springframework.stereotype.Service;
 
-import com.xinyue.business.service.IMyService;
+import com.xinyue.business.plugins.service.IMyService;
 
 @Service("myService")
 public class MyServiceImpl implements IMyService{

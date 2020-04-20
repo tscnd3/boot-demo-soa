@@ -1,4 +1,4 @@
-package com.xinyue.business;
+package com.xinyue.business.plugins;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
