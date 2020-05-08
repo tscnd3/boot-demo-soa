@@ -11,5 +11,6 @@
 	<module>boo-demo-web</module>
 	<module>boot-demo-plugins</module>
 	<module>boot-demo-java</module>
+	<module>boot-demo-websocket</module>
   </modules>
 </project>
