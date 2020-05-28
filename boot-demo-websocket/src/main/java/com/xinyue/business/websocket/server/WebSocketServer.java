@@ -2,8 +2,6 @@ package com.xinyue.business.websocket.server;
 
 
 import java.io.IOException;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
@@ -16,11 +14,11 @@ import javax.websocket.server.ServerEndpoint;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.xinyue.business.websocket.utils.SpringUtils;
 import com.xinyue.framework.redis.util.RedisUtil;
 
 
@@ -33,28 +31,23 @@ public class WebSocketServer {
 
     static Log log=LogFactory.getLog(WebSocketServer.class);
     /**静态变量，用来记录当前在线连接数。应该把它设计成线程安全的。*/
-    private static final AtomicInteger onlineCount = new AtomicInteger();
+//    private static final AtomicInteger onlineCount = new AtomicInteger(0);
+    
     /**concurrent包的线程安全Set，用来存放每个客户端对应的MyWebSocket对象。*/
- //   private static ConcurrentHashMap<String,WebSocketServer> webSocketMap = new ConcurrentHashMap<>();
+//    private static ConcurrentHashMap<String,WebSocketServer> webSocketMap = new ConcurrentHashMap<>();
     
-	
-	private  static  RedisUtil redisUtil;
-	
+    
+    private static RedisUtil redisUtil=SpringUtils.getBean(RedisUtil.class);
 
-    @Autowired
-    public WebSocketServer(RedisUtil redisUtil) {
-        WebSocketServer.redisUtil = redisUtil;
-    }
-    
-	
-    
     
     /**与某个客户端的连接会话，需要通过它来给客户端发送数据*/
     private Session session;
     /**接收userId*/
     private String userId="";
     
-    private final static String SOCKET_KEY="im:socket:%s";
+    private final static String SOCKET_KEY="im:socket_hash";
+    
+    private final static String SOCKET_ID="socket_id:%s";
 
     /**
      * 连接建立成功调用的方法*/
@@ -70,20 +63,18 @@ public class WebSocketServer {
 //            webSocketMap.put(userId,this); //加入set中
 //            onlineCount.incrementAndGet();//在线数加1
 //        }
-         String socketKey=String.format(SOCKET_KEY,userId);
-        if(redisUtil.hasKey(socketKey)){
-        	redisUtil.del(socketKey);
-        	redisUtil.set(socketKey,this);
+         String socketId=String.format(SOCKET_ID, userId);
+         //	HEXISTS key field 
+        if(redisUtil.hHasKey(SOCKET_KEY, socketId)){
+        	redisUtil.hdel(SOCKET_KEY, socketId);
+        	redisUtil.hset(SOCKET_KEY, socketId, JSONObject.toJSONString(this));
         }else{
-        	redisUtil.set(socketKey, this);
+        	redisUtil.hset(SOCKET_KEY, socketId, JSONObject.toJSONString(this));
+//        	onlineCount.incrementAndGet();//在线数加1
         }
-        	
         
-        
-        
-        
-        
-        log.info("用户连接:"+userId+",当前在线人数为:" +onlineCount.get());
+//        log.info("用户连接:"+userId+",当前在线人数为:" +onlineCount.get());
+        log.info("用户连接:"+userId+",当前在线人数为:" +redisUtil.hlen(SOCKET_KEY));
         try {
             sendMessage("连接成功");
         } catch (IOException e) {
@@ -101,12 +92,13 @@ public class WebSocketServer {
 //            //从set中删除
 //            onlineCount.decrementAndGet();
 //        }
-    	String socketKey=String.format(SOCKET_KEY,userId);
-    	if(redisUtil.hasKey(socketKey)){
-    		redisUtil.del(socketKey);
-          onlineCount.decrementAndGet();
+    	String socketId=String.format(SOCKET_ID,userId);
+    	if(redisUtil.hasKey(socketId)){
+    		redisUtil.hdel(SOCKET_KEY, socketId);
+//          onlineCount.decrementAndGet();
     	}
-        log.info("用户退出:"+userId+",当前在线人数为:" + onlineCount.get());
+//        log.info("用户退出:"+userId+",当前在线人数为:" + onlineCount.get());
+    	 log.info("用户退出:"+userId+",当前在线人数为:" + redisUtil.hlen(SOCKET_KEY));
     }
 
     /**
@@ -123,9 +115,13 @@ public class WebSocketServer {
                 //解析发送的报文
                 JSONObject jsonObject = JSON.parseObject(message);
                 //追加发送人(防止串改)
+                
+               String userId=session.getPathParameters().get("userId");
+                
                 jsonObject.put("fromUserId",this.userId);
                 String toUserId=jsonObject.getString("toUserId");
-                String socketKey=String.format(SOCKET_KEY, toUserId);
+                String sendSocketId=String.format(SOCKET_ID, userId);
+                String receiveSocketId=String.format(SOCKET_ID, toUserId);
                 //传送给对应toUserId用户的websocket
 //                if(StringUtils.isNotBlank(toUserId)&&webSocketMap.containsKey(toUserId)){
 //                    webSocketMap.get(toUserId).sendMessage(jsonObject.toJSONString());
@@ -133,9 +129,14 @@ public class WebSocketServer {
 //                    log.error("请求的userId:"+toUserId+"不在该服务器上");
 //                    //否则不在这个服务器上，发送到mysql或者redis
 //                }
-                if(redisUtil.hasKey(socketKey)){
-                	WebSocketServer wSocketServer=(WebSocketServer)redisUtil.get(toUserId);
+                if(redisUtil.hHasKey(SOCKET_KEY,(receiveSocketId))){
+                	WebSocketServer wSocketServer=(WebSocketServer)redisUtil.hget(SOCKET_KEY,receiveSocketId);
                 	wSocketServer.sendMessage(jsonObject.toJSONString());
+                }else{
+                	WebSocketServer wSocketServer=(WebSocketServer)redisUtil.hget(SOCKET_KEY,sendSocketId);
+                	wSocketServer.sendMessage("请求的userId:"+userId+"不在该服务器上");
+                	log.error("请求的userId:"+userId+"不在该服务器上");
+//                  //否则不在这个服务器上，发送到mysql或者redis
                 }
             }catch (Exception e){
                 e.printStackTrace();
@@ -166,18 +167,18 @@ public class WebSocketServer {
      * */
     public static void sendInfo(String message,@PathParam("userId") String userId) throws IOException {
         log.info("发送消息到:"+userId+"，报文:"+message);
-    	String socketKey=String.format(SOCKET_KEY,userId);
+    	String socketId=String.format(SOCKET_ID,userId);
 //        if(StringUtils.isNotBlank(userId)&&webSocketMap.containsKey(userId)){
 //            webSocketMap.get(userId).sendMessage(message);
 //        }else{
 //            log.error("用户"+userId+",不在线！");
 //        }
-        if(redisUtil.hasKey(socketKey)){
-        	WebSocketServer webSocketServer=(WebSocketServer) redisUtil.get(socketKey);
+        if(redisUtil.hHasKey(SOCKET_KEY,socketId)){
+        	WebSocketServer webSocketServer=(WebSocketServer) redisUtil.hget(SOCKET_KEY,socketId);
         	webSocketServer.sendMessage(message);
-      }else{
-          log.error("用户"+userId+",不在线！");
-      }
+	     }else{
+	          log.error("用户"+userId+",不在线！");
+	     }
     }
 
 
