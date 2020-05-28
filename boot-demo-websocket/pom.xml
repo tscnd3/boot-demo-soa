@@ -46,17 +46,34 @@
 		   <groupId>org.springframework.boot</groupId>
 		   <artifactId>spring-boot-starter-thymeleaf</artifactId>
 		</dependency> 
-				
+		
+		<dependency>
+			<groupId>com.xinyue</groupId>
+			<artifactId>framework-redis</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>		
+		
 		
 	</dependencies>
 	
-	
-
-	
-	
 	<build>
+		<resources>
+			<resource>
+				<directory>src/main/java</directory>
+				<includes>
+					<include>**/*.xml</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<includes>
+					<include>**/*</include>
+				</includes>
+			</resource>
+		</resources>
+	
 		<plugins>
-			 <plugin>
+			 <plugin><!-- 不加上这个springboot打出来的包将不包含依赖 -->
 			      <groupId>org.springframework.boot</groupId>
 			      <artifactId>spring-boot-maven-plugin</artifactId>
 			  </plugin>
