@@ -12,5 +12,6 @@
 	<module>boot-demo-plugins</module>
 	<module>boot-demo-java</module>
 	<module>boot-demo-websocket</module>
+	<module>boot-demo-lock</module>
   </modules>
 </project>
