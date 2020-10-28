@@ -264,7 +264,7 @@ public class SpringPluginFactory implements ApplicationContextAware, Initializin
 			stream.close();
 		}
 		// 将本地jar 文件加载至 classLoader
-		URLClassLoader loader = (URLClassLoader)getClass().getClassLoader();
+		URLClassLoader loader = (URLClassLoader) ClassLoader.getSystemClassLoader();
 		URL targetUrl = jarFile.toURI().toURL();
 		System.out.println("urls===1====length==="+loader.getURLs().length);
 		boolean isLoader = false;

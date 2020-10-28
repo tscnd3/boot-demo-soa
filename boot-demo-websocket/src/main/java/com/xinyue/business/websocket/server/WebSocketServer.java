@@ -2,6 +2,7 @@ package com.xinyue.business.websocket.server;
 
 
 import java.io.IOException;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
@@ -34,7 +35,7 @@ public class WebSocketServer {
 //    private static final AtomicInteger onlineCount = new AtomicInteger(0);
     
     /**concurrent包的线程安全Set，用来存放每个客户端对应的MyWebSocket对象。*/
-//    private static ConcurrentHashMap<String,WebSocketServer> webSocketMap = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<String,WebSocketServer> webSocketMap = new ConcurrentHashMap<>();
     
     
     private static RedisUtil redisUtil=SpringUtils.getBean(RedisUtil.class);
@@ -48,6 +49,10 @@ public class WebSocketServer {
     private final static String SOCKET_KEY="im:socket_hash";
     
     private final static String SOCKET_ID="socket_id:%s";
+    
+    private final static String ONLINE_USER_SET="online_user_set";
+    
+    
 
     /**
      * 连接建立成功调用的方法*/
@@ -56,25 +61,14 @@ public class WebSocketServer {
         this.session = session;
         this.userId=userId;
         
-//        if(webSocketMap.containsKey(userId)){
-//            webSocketMap.remove(userId);
-//            webSocketMap.put(userId,this);  //加入set中
-//        }else{
-//            webSocketMap.put(userId,this); //加入set中
-//            onlineCount.incrementAndGet();//在线数加1
-//        }
-         String socketId=String.format(SOCKET_ID, userId);
-         //	HEXISTS key field 
-        if(redisUtil.hHasKey(SOCKET_KEY, socketId)){
-        	redisUtil.hdel(SOCKET_KEY, socketId);
-        	redisUtil.hset(SOCKET_KEY, socketId, JSONObject.toJSONString(this));
+        if(webSocketMap.containsKey(userId)){
+            webSocketMap.remove(userId);
+            webSocketMap.put(userId,this);  //加入set中
         }else{
-        	redisUtil.hset(SOCKET_KEY, socketId, JSONObject.toJSONString(this));
-//        	onlineCount.incrementAndGet();//在线数加1
+            webSocketMap.put(userId,this); //加入set中
         }
-        
-//        log.info("用户连接:"+userId+",当前在线人数为:" +onlineCount.get());
-        log.info("用户连接:"+userId+",当前在线人数为:" +redisUtil.hlen(SOCKET_KEY));
+        redisUtil.set(ONLINE_USER_SET, userId);//设置在线列表
+        log.info("用户连接:"+userId+",当前在线人数为:" +redisUtil.sGetSetSize(ONLINE_USER_SET));
         try {
             sendMessage("连接成功");
         } catch (IOException e) {

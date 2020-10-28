@@ -141,7 +141,7 @@ public class SpringPluginController extends BaseController {
 		} catch (Exception e) {
 			result.put("code", 500);
 			result.put("message", "error");
-			logger.error("禁用指定插件异常->", e);
+			logger.error("安装插件异常->", e);
 		}
 		return result;
 	}
